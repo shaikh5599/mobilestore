@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<style th:fragment="sidebar-css">
+        /* SIDEBAR BASE */
+        .sidebar {
+            width: 250px; 
+            height: 100vh;
+            background: #123456; 
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 12px;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1); 
+            overflow-y: auto; 
+        }
+
+        /* BRANDING (Title) */
+        .sidebar .brand {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            border-bottom: 1px solid #1d4f85; 
+            padding: 10px 5px 20px 5px; 
+        }
+
+        .sidebar .brand a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px; 
+        }
+
+        /* LIST SETUP */
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            margin: 8px 0; 
+        }
+
+        /* LINKS STYLING */
+        .sidebar ul li a {
+            display: block;
+            padding: 12px 15px; 
+            color: white;
+            text-decoration: none;
+            border-radius: 6px; 
+            transition: all 0.3s ease; 
+            font-size: 16px;
+        }
+
+        /* ICONS SPACING */
+        .sidebar ul li a i {
+            width: 25px;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        /* HOVER & ACTIVE STATE */
+        .sidebar ul li a:hover,
+        .sidebar ul li.active a {
+            background: #1d4f85; 
+            transform: translateX(5px); 
+        }
+
+        /* LOGOUT BUTTON */
+        .sidebar ul li.logout-btn {
+            margin-top: 40px;
+            border-top: 1px solid #1d4f85;
+            padding-top: 20px;
+        }
+
+        .sidebar ul li.logout-btn a {
+            background: #d9534f;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .sidebar ul li.logout-btn a:hover {
+            background: #c9302c; 
+            transform: none; 
+        }
+
+        /* MAIN CONTENT ALIGNMENT */
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div th:fragment="sidebar(activeTab)" class="sidebar">
+    
+    <div class="brand">
+        <a th:href="@{/}" class="text-decoration-none text-white d-flex flex-column align-items-center">
+            <div class="mb-2">
+                <!-- YAHAN ERROR THA: Ab isko store.logo se replace kar diya gaya hai -->
+                <th:block th:if="${store.logo != null && store.logo != ''}">
+                    <img th:src="${store.logo}" 
+                         alt="Store Logo" 
+                         style="height: 50px; object-fit: contain; border-radius: 5px;">
+                </th:block>
+                <th:block th:unless="${store.logo != null && store.logo != ''}">
+                    <i class="fas fa-mobile-alt fa-2x text-info"></i>
+                </th:block>
+            </div>
+            
+            <span class="fs-5 fw-bold" th:text="${store.storeName != null ? store.storeName : 'Mobile Store'}">Mobile Store</span>
+        </a>
+    </div>
+    
+    <ul class="p-0 mt-2">
+        <li th:classappend="${activeTab == 'dashboard'} ? 'active' : ''">
+            <a th:href="@{/admin/dashboard}">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+        </li>
+        
+        <li th:classappend="${activeTab == 'add-product'} ? 'active' : ''">
+            <a th:href="@{/admin/products/add}">
+                <i class="fas fa-plus-circle"></i> Add Products
+            </a>
+        </li>
+        
+        <li th:classappend="${activeTab == 'manage-products'} ? 'active' : ''">
+            <a th:href="@{/admin/products}">
+                <i class="fas fa-boxes"></i> Manage Products
+            </a>
+        </li>
+
+        <li th:classappend="${activeTab == 'orders'} ? 'active' : ''">
+            <a th:href="@{/admin/orders}">
+                <i class="fas fa-shopping-cart"></i> Orders
+            </a>
+        </li>
+        
+        <li th:classappend="${activeTab == 'categories'} ? 'active' : ''">
+            <a th:href="@{/admin/categories}">
+                <i class="fas fa-tags"></i> Categories
+            </a>
+        </li>
+        
+        <li th:classappend="${activeTab == 'customers'} ? 'active' : ''">
+            <a th:href="@{/admin/customers}">
+                <i class="fas fa-users"></i> Customers
+            </a>
+        </li>
+
+        <li th:classappend="${activeTab == 'settings'} ? 'active' : ''">
+            <a th:href="@{/admin/settings}">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+        </li>
+
+        <li class="logout-btn">
+            <a th:href="@{/logout}">
+                <i class="fas fa-sign-out-alt"></i> Log Out
+            </a>
+        </li>
+    </ul>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Admin | Dynamic Product Creator</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<div th:replace="~{admin/fragments/sidebar :: sidebar-css}"></div>
+
+<style>
+    body { background: #eef2f7; }
+    .preview-box { background: white; border-radius: 15px; padding: 25px; position: sticky; top: 100px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .preview-label { background: #0d6efd; color: white; padding: 2px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+    .form-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .preview-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 13px; }
+    .feature-badge { font-size: 11px; padding: 5px 10px; border-radius: 5px; background: #f8f9fa; border: 1px solid #dee2e6; color: #495057; }
+    .feature-badge i { color: #198754; margin-right: 4px; }
+</style>
+</head>
+<body>
+
+<div th:replace="~{admin/fragments/sidebar :: sidebar('add-product')}"></div>
+
+<div class="main-content" style="padding-top: 80px;">
+    <div class="row px-3">
+
+        <div class="col-md-7">
+            <div class="form-card shadow p-4 bg-white" style="border-radius: 15px;">
+                <h4 class="fw-bold mb-4 text-primary">Add New Product</h4>
+
+                <form th:action="@{/admin/products/add}" method="post" enctype="multipart/form-data">
+
+                    <h6 class="text-secondary fw-bold mb-3 border-bottom pb-2">Basic Details</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Short Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" id="inputName" class="form-control" oninput="updatePreview()" placeholder="E.g. iPhone 15" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Full Title <span class="text-danger">*</span></label>
+                            <input type="text" name="title" id="inputTitle" class="form-control" oninput="updatePreview()" placeholder="E.g. Apple iPhone 15 Pro Max (256GB)" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Brand <span class="text-danger">*</span></label>
+                            <input type="text" name="brand" id="inputBrand" class="form-control" oninput="updatePreview()" placeholder="E.g. Apple" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Category <span class="text-danger">*</span></label>
+                            <select name="category" class="form-select" id="inputCategory" onchange="updatePreview(); updateDynamicFields();" required>
+                                <option value="" selected disabled>-- Select Category --</option>
+                                <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h6 class="text-secondary fw-bold mb-3 mt-3 border-bottom pb-2">Pricing & Inventory</h6>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Selling Price (₹) <span class="text-danger">*</span></label>
+                            <input type="number" name="price" id="inputPrice" class="form-control" oninput="updatePreview()" step="0.01" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">MRP (₹) <span class="text-danger">*</span></label>
+                            <input type="number" name="mrp" id="inputMRP" class="form-control" oninput="updatePreview()" step="0.01" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Stock Qty <span class="text-danger">*</span></label>
+                            <input type="number" name="stock" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <h6 class="text-secondary fw-bold mb-3 mt-3 border-bottom pb-2">Specifications & Features</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-primary" id="dynamicVariantLabel">Variant / Details</label>
+                            <input type="text" name="storage" id="inputStorage" class="form-control border-primary" oninput="updatePreview()" placeholder="E.g. 128GB, 8GB RAM">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Warranty</label>
+                            <input type="text" name="warranty" id="inputWarranty" class="form-control" oninput="updatePreview()" placeholder="E.g. 1 Year Brand Warranty">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Highlights (Comma separated) <span class="text-danger">*</span></label>
+                        <input type="text" name="highlights" id="inputHighlights" class="form-control" oninput="updatePreview()" placeholder="E.g. 50MP Camera, 5000mAh Battery, Fast Charging" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Product Description <span class="text-danger">*</span></label>
+                        <textarea name="description" id="inputDesc" class="form-control" rows="3" oninput="updatePreview()" placeholder="Detailed product description..." required></textarea>
+                    </div>
+
+                    <h6 class="text-secondary fw-bold mb-3 mt-3 border-bottom pb-2">Policies & Status</h6>
+                    <div class="d-flex flex-wrap gap-4 mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="freeDelivery" id="inputFreeDelivery" value="true" onchange="updatePreview()">
+                            <input type="hidden" name="freeDelivery" value="false">
+                            <label class="form-check-label fw-bold" for="inputFreeDelivery">Free Delivery</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="returnPolicy" id="inputReturn" value="true" onchange="updatePreview()">
+                            <input type="hidden" name="returnPolicy" value="false">
+                            <label class="form-check-label fw-bold" for="inputReturn">Return Policy Active</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="inStock" id="inputInStock" value="true" onchange="updatePreview()" checked>
+                            <input type="hidden" name="inStock" value="false">
+                            <label class="form-check-label fw-bold" for="inputInStock">In Stock</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Product Image <span class="text-danger">*</span></label>
+                        <input type="file" name="img" class="form-control" accept="image/*" onchange="previewImage(this)" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow">
+                        <i class="fas fa-plus-circle me-2"></i> Publish Product
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="preview-box p-4 bg-white shadow" style="border-radius: 15px;">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                    <h5 class="text-muted m-0"><i class="fas fa-eye me-2"></i>LIVE PREVIEW</h5>
+                    <span class="preview-label" id="viewCategoryTag">CATEGORY</span>
+                </div>
+
+                <div class="text-center mb-3 p-3 bg-light rounded" style="height: 220px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                    <img id="viewImg" src="https://via.placeholder.com/300" class="img-fluid" style="max-height: 100%; mix-blend-mode: multiply;">
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-primary fw-bold m-0" id="viewBrand">BRAND</h6>
+                    <span class="badge bg-success" id="viewStockStatus">In Stock</span>
+                </div>
+                
+                <h5 class="fw-bold text-dark mb-1" id="viewTitle" style="line-height: 1.3;">Product Full Title</h5>
+                <p class="text-muted small mb-2" id="viewName">(Short Name)</p>
+
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <h2 class="fw-bold m-0 text-dark">₹<span id="viewPrice">0</span></h2>
+                    <span class="text-muted text-decoration-line-through">₹<span id="viewMRP">0</span></span>
+                    <span class="text-success fw-bold ms-2" id="viewDiscount"></span>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mb-3" id="badgesContainer">
+                    <span class="feature-badge" id="badgeStorage" style="display:none;"><i class="fas fa-info-circle"></i> <span id="vStorage"></span></span>
+                    <span class="feature-badge" id="badgeWarranty" style="display:none;"><i class="fas fa-shield-alt"></i> <span id="vWarranty"></span></span>
+                    <span class="feature-badge" id="badgeDelivery" style="display:none;"><i class="fas fa-truck"></i> Free Delivery</span>
+                    <span class="feature-badge" id="badgeReturn" style="display:none;"><i class="fas fa-undo"></i> Return Available</span>
+                </div>
+
+                <ul class="mb-3 pl-3 text-muted" id="viewHighlights" style="font-size: 13px; padding-left: 20px;">
+                    <li>Highlight points will appear here...</li>
+                </ul>
+                
+                <p class="text-muted mt-2 preview-desc border-top pt-2" id="viewDesc">Product description will appear here...</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// YEH NAYA FUNCTION HAI JO MAGIC KAREGA!
+function updateDynamicFields() {
+    const catSelect = document.getElementById('inputCategory');
+    const categoryName = catSelect.options[catSelect.selectedIndex]?.text.toLowerCase() || "";
+
+    const dynamicLabel = document.getElementById('dynamicVariantLabel');
+    const dynamicInput = document.getElementById('inputStorage');
+
+    // Default Fallback
+    dynamicLabel.innerText = "Variant / Details";
+    dynamicInput.placeholder = "Enter product specific details...";
+
+    // Category ke hisab se condition
+    if (categoryName.includes("mobile") || categoryName.includes("smartphone")) {
+        dynamicLabel.innerText = "RAM & Storage";
+        dynamicInput.placeholder = "E.g. 8GB RAM, 128GB Storage";
+        
+    } else if (categoryName.includes("audio") || categoryName.includes("earbud") || categoryName.includes("headphone")) {
+        dynamicLabel.innerText = "Color & Type";
+        dynamicInput.placeholder = "E.g. Black, Wireless, TWS";
+        
+    } else if (categoryName.includes("charger") || categoryName.includes("adapter") || categoryName.includes("cable")) {
+        dynamicLabel.innerText = "Wattage & Output";
+        dynamicInput.placeholder = "E.g. 65W Fast Charger, Type-C";
+        
+    } else if (categoryName.includes("watch") || categoryName.includes("smartwatch")) {
+        dynamicLabel.innerText = "Dial Size & Color";
+        dynamicInput.placeholder = "E.g. 44mm, Midnight Black";
+        
+    } else if (categoryName.includes("cover") || categoryName.includes("accessories")) {
+        dynamicLabel.innerText = "Compatible Model";
+        dynamicInput.placeholder = "E.g. For Samsung S24 Ultra";
+    }
+}
+
+// Purana Update Preview Function (thoda update kiya hai)
+function updatePreview() {
+    document.getElementById('viewName').innerText = "(" + (document.getElementById('inputName').value || "Short Name") + ")";
+    document.getElementById('viewTitle').innerText = document.getElementById('inputTitle').value || "Product Full Title";
+    document.getElementById('viewBrand').innerText = document.getElementById('inputBrand').value.toUpperCase() || "BRAND";
+    
+    const catSelect = document.getElementById('inputCategory');
+    document.getElementById('viewCategoryTag').innerText = catSelect.options[catSelect.selectedIndex]?.text || "CATEGORY";
+
+    const price = parseFloat(document.getElementById('inputPrice').value) || 0;
+    const mrp = parseFloat(document.getElementById('inputMRP').value) || 0;
+    document.getElementById('viewPrice').innerText = price.toLocaleString('en-IN');
+    document.getElementById('viewMRP').innerText = mrp.toLocaleString('en-IN');
+
+    if (mrp > price && price > 0) {
+        let discount = Math.round(((mrp - price) / mrp) * 100);
+        document.getElementById('viewDiscount').innerText = discount + "% Off";
+    } else {
+        document.getElementById('viewDiscount').innerText = "";
+    }
+
+    const storage = document.getElementById('inputStorage').value;
+    const warranty = document.getElementById('inputWarranty').value;
+    
+    document.getElementById('badgeStorage').style.display = storage ? "inline-block" : "none";
+    document.getElementById('vStorage').innerText = storage;
+    
+    document.getElementById('badgeWarranty').style.display = warranty ? "inline-block" : "none";
+    document.getElementById('vWarranty').innerText = warranty;
+
+    document.getElementById('badgeDelivery').style.display = document.getElementById('inputFreeDelivery').checked ? "inline-block" : "none";
+    document.getElementById('badgeReturn').style.display = document.getElementById('inputReturn').checked ? "inline-block" : "none";
+    
+    const stockBadge = document.getElementById('viewStockStatus');
+    if(document.getElementById('inputInStock').checked) {
+        stockBadge.className = "badge bg-success";
+        stockBadge.innerText = "In Stock";
+    } else {
+        stockBadge.className = "badge bg-danger";
+        stockBadge.innerText = "Out of Stock";
+    }
+
+    const highlightsText = document.getElementById('inputHighlights').value;
+    const highlightsUL = document.getElementById('viewHighlights');
+    highlightsUL.innerHTML = "";
+    if(highlightsText) {
+        let points = highlightsText.split(',');
+        points.forEach(point => {
+            if(point.trim() !== "") {
+                let li = document.createElement("li");
+                li.innerText = point.trim();
+                highlightsUL.appendChild(li);
+            }
+        });
+    } else {
+        highlightsUL.innerHTML = "<li>Highlight points will appear here...</li>";
+    }
+
+    document.getElementById('viewDesc').innerText = document.getElementById('inputDesc').value || "Product description will appear here...";
+}
+
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('viewImg').src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+
+</body>
+</html>

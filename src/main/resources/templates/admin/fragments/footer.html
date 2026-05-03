@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<style>
+/* Taaki footer hamesha page ke niche rahe */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.main-content {
+    flex: 1; /* Ye content ko upar dhakelega aur footer ko niche */
+}
+</style>
+<body>
+    <div th:fragment="footer">
+        <footer class="bg-dark text-white pt-5 pb-3 mt-5">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <h5 class="fw-bold text-info mb-3" th:text="${store.storeName}">Mobile Store</h5>
+                        <p class="text-muted" th:text="${store.address}">Shop Address will appear here.</p>
+                        <div class="mt-3">
+                            <a th:href="${store.facebookUrl}" class="text-white me-3" target="_blank"><i class="fab fa-facebook fa-lg"></i></a>
+                            <a th:href="${store.instagramUrl}" class="text-white me-3" target="_blank"><i class="fab fa-instagram fa-lg"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4 text-md-center">
+                        <h5 class="fw-bold mb-3 text-info">Contact Us</h5>
+                        <p class="mb-1"><i class="fas fa-envelope me-2"></i> <span th:text="${store.storeEmail}">admin@shop.com</span></p>
+                        <p><i class="fas fa-phone me-2"></i> <span th:text="${store.contactNo}">+91 9876543210</span></p>
+                    </div>
+
+                    <div class="col-md-4 mb-4 text-md-end">
+                        <h5 class="fw-bold mb-3 text-info">Quick Support</h5>
+                        <p class="text-muted small">Monday - Saturday<br>10:00 AM - 9:00 PM</p>
+                    </div>
+                </div>
+                <hr class="bg-secondary">
+                <div class="text-center mt-3">
+                    <p class="mb-0 small text-muted" th:text="${store.footerText}">© 2026 Your Shop. All Rights Reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

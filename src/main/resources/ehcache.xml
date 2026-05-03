@@ -1,0 +1,19 @@
+<config xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xmlns='http://www.ehcache.org/v3'
+        xmlns:jsr107='http://www.ehcache.org/v3/jsr107'>
+
+    <cache-template name="defaultTemplate">
+        <expiry>
+            <none/> </expiry>
+        <resources>
+            <heap unit="entries">2000</heap> </resources>
+    </cache-template>
+
+    <cache alias="com.mobilestore.entity.Product" uses-template="defaultTemplate"/>
+    <cache alias="com.mobilestore.entity.Category" uses-template="defaultTemplate"/>
+    <cache alias="com.mobilestore.entity.StoreSetting" uses-template="defaultTemplate"/>
+    
+    <cache alias="default-query-results-region" uses-template="defaultTemplate"/>
+    <cache alias="default-update-timestamps-region" uses-template="defaultTemplate"/>
+
+</config>

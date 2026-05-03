@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Invoice - [[${order.id}]]</title>
+    <style>
+        body { font-family: sans-serif; padding: 50px; }
+        .bill-box { border: 1px solid #eee; padding: 30px; max-width: 800px; margin: auto; }
+        .header { display: flex; justify-content: space-between; border-bottom: 2px solid #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body onload="window.print()">
+    <div class="no-print" style="text-align:center; margin-bottom: 20px;">
+        <button onclick="window.print()">Print Bill</button>
+    </div>
+    <div class="bill-box">
+        <div class="header">
+            <h2>MOBILE STORE</h2>
+            <div>
+                <p>Invoice #: [[${order.id}]]</p>
+                <p>Date: [[${#temporals.format(order.orderDate, 'dd-MM-yyyy')}]]</p>
+            </div>
+        </div>
+        <div style="margin-top: 20px;">
+            <strong>Customer Details:</strong><br>
+            [[${order.fullName}]]<br>
+            [[${order.address}]], [[${order.city}]]<br>
+            Phone: [[${order.mobileNumber}]]
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${order.orderItems}">
+                    <td th:text="${item.product.title}"></td>
+                    <td th:text="${item.quantity}"></td>
+                    <td th:text="${item.price}"></td>
+                    <td th:text="${item.price * item.quantity}"></td>
+                </tr>
+            </tbody>
+        </table>
+        <h3 style="text-align: right;">Total Amount: ₹[[${order.totalAmount}]]</h3>
+        <p style="text-align: center; margin-top: 50px;">Thank you for shopping!</p>
+    </div>
+</body>
+</html>

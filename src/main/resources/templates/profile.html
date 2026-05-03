@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Profile - Mobile Store</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body { 
+            background-color: #f8fafc; 
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .main-content { 
+            flex: 1 0 auto; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Profile Header */
+        .profile-header {
+            background: linear-gradient(135deg, #1a375d 0%, #00a8ff 100%);
+            border-radius: 0 0 30px 30px;
+            padding: 30px 20px 70px; 
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* Top Right Settings Icon */
+        .settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 26px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .settings-btn:active { transform: rotate(45deg); }
+
+        .profile-avatar {
+            width: 110px; height: 110px;
+            border-radius: 50%; border: 4px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            object-fit: cover; background-color: white;
+            margin-top: 10px;
+        }
+
+        /* Action Cards */
+        .action-cards-container { 
+            margin-top: -50px; 
+            padding: 0 15px; 
+            position: relative;
+            z-index: 10;
+        }
+        .action-card {
+            background: white; border-radius: 16px; padding: 25px 10px;
+            text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0; text-decoration: none;
+            display: block; transition: 0.3s;
+        }
+        .action-card:active { transform: scale(0.95); }
+        .action-card i { font-size: 32px; margin-bottom: 12px; }
+        .action-card span { display: block; font-size: 14px; font-weight: 700; color: #475569; }
+
+        /* Logout Button Area (Pushed to bottom naturally) */
+        .logout-btn-container { 
+            padding: 0 15px; 
+            text-align: center; 
+            margin-top: auto; /* Ye button ko apne aap niche dhakel dega */
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content { padding-bottom: 60px; /* Exact Bottom Nav Bar fit */ }
+        }
+    </style>
+</head>
+<body>
+
+    <div th:replace="~{fragments/navbar :: header}"></div>
+
+    <div class="main-content">
+        
+        <div class="profile-header">
+           
+
+            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${loggedInUser != null ? loggedInUser.name : 'User'} + '&background=ffffff&color=1a375d&size=128'}" 
+                 class="profile-avatar mb-3" alt="Profile Picture">
+            
+            <h3 class="fw-bold mb-1" th:text="${loggedInUser != null ? loggedInUser.name : 'Guest User'}">John Doe</h3>
+            <p class="mb-0" style="color: #e0f2fe; font-size: 15px;" th:text="${loggedInUser != null ? loggedInUser.email : 'guest@example.com'}">john@example.com</p>
+        </div>
+
+        <div class="action-cards-container container" style="max-width: 600px;">
+            <div class="row g-3">
+                <div class="col-4">
+                    <a href="/my-orders" class="action-card">
+                        <i class="fas fa-box-open text-primary"></i>
+                        <span>Orders</span>
+                    </a>
+                </div>
+                <div class="col-4">
+                    <a href="/cart" class="action-card">
+                        <i class="fas fa-shopping-cart text-warning"></i>
+                        <span>Cart</span>
+                    </a>
+                </div>
+                <div class="col-4">
+                    <a href="#" class="action-card">
+                        <i class="fas fa-heart text-danger"></i>
+                        <span>Wishlist</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="container logout-btn-container" style="max-width: 600px;">
+            <a th:if="${loggedInUser != null}" href="/logout" class="btn btn-outline-danger fw-bold rounded-pill w-100 shadow-sm" style="border-width: 2px; padding: 14px 0; font-size: 16px;">
+                <i class="fas fa-sign-out-alt me-2"></i> Log Out
+            </a>
+            
+            <a th:unless="${loggedInUser != null}" href="/login" class="btn btn-outline-primary fw-bold rounded-pill w-100 shadow-sm" style="border-width: 2px; padding: 14px 0; font-size: 16px;">
+                <i class="fas fa-sign-in-alt me-2"></i> Log In to Continue
+            </a>
+        </div>
+        
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div> 
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

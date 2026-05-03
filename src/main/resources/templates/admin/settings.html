@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Admin | Premium Settings</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<div th:replace="~{admin/fragments/sidebar :: sidebar-css}"></div>
+
+<style>
+    body { background: #f8fafc; font-family: 'Inter', sans-serif; }
+    .main-content { padding: 90px 30px 40px 280px; }
+    .alert-fixed { position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: none; border-radius: 12px; }
+    .settings-wrapper { background: #ffffff; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); display: flex; overflow: hidden; border: 1px solid #eef2f6; width: 100%; max-width: 1300px; min-height: 75vh; margin: 0 auto; }
+    .settings-sidebar { width: 300px; background: #fafbfc; border-right: 1px solid #f1f5f9; padding: 30px 0; }
+    .nav-item-link { padding: 16px 25px; display: flex; align-items: center; color: #64748b; font-weight: 500; text-decoration: none; border-left: 4px solid transparent; transition: 0.3s; }
+    .nav-item-link i { margin-right: 12px; font-size: 18px; width: 20px; text-align: center; }
+    .nav-item-link.active { color: #0d6efd; background: #eff6ff; border-left: 4px solid #0d6efd; }
+    .nav-item-link:hover:not(.active) { background: #f8fafc; color: #334155; }
+    .settings-body { flex: 1; padding: 50px; background: #fff; }
+    .section-title { font-size: 24px; font-weight: 700; color: #1e293b; margin-bottom: 30px; }
+    .admin-profile-header { display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 25px; border-radius: 15px; margin-bottom: 35px; }
+    .admin-avatar { width: 70px; height: 70px; border-radius: 50%; background: #0d6efd; color: white; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2); }
+    .form-label { font-weight: 600; color: #475569; font-size: 14px; margin-bottom: 8px; }
+    .form-control { border-radius: 10px; padding: 12px 15px; border: 1px solid #e2e8f0; background: #fcfdfe; transition: 0.2s; }
+    .btn-save-settings { background: #0d6efd; border: none; padding: 12px 35px; border-radius: 10px; font-weight: 600; color: white; transition: 0.3s; }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+</head>
+<body>
+
+<div th:replace="~{admin/fragments/sidebar :: sidebar('settings')}"></div>
+
+<div class="main-content">
+    
+    <div th:if="${session.succMsg}" class="alert alert-success alert-dismissible fade show alert-fixed" role="alert">
+        <i class="fas fa-check-circle me-2"></i> <span th:text="${session.succMsg}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <th:block th:text="${@sessionHelper.removeMessageFromSession()}"></th:block>
+    </div>
+
+    <div th:if="${session.errorMsg}" class="alert alert-danger alert-dismissible fade show alert-fixed" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i> <span th:text="${session.errorMsg}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <th:block th:text="${@sessionHelper.removeMessageFromSession()}"></th:block>
+    </div>
+
+    <div class="settings-wrapper">
+        <div class="settings-sidebar">
+            <h6 class="px-4 text-muted small fw-bold text-uppercase mb-3">Account Control</h6>
+            <nav class="nav flex-column nav-pills">
+                <a class="nav-item-link active" data-bs-toggle="pill" href="#profile-tab"><i class="fas fa-user-circle"></i> Profile Info</a>
+                <a class="nav-item-link" data-bs-toggle="pill" href="#security-tab"><i class="fas fa-shield-alt"></i> Security</a>
+                <a class="nav-item-link" data-bs-toggle="pill" href="#store-tab"><i class="fas fa-store"></i> Shop Details</a>
+                <a class="nav-item-link" data-bs-toggle="pill" href="#banner-tab"><i class="fas fa-images"></i> Banners</a>
+            </nav>
+        </div>
+
+        <div class="settings-body tab-content">
+            
+            <div class="tab-pane fade show active" id="profile-tab">
+                <div class="section-title">Admin Profile</div>
+                
+                <div class="admin-profile-header" th:if="${admin != null}">
+                    <div class="admin-avatar" th:text="${admin.name != null ? #strings.substring(admin.name,0,1) : 'A'}">A</div>
+                    <div>
+                        <h5 class="fw-bold mb-1 text-dark" th:text="${admin.name}">Admin Name</h5>
+                        <p class="text-muted small mb-0">System Administrator</p>
+                    </div>
+                </div>
+
+                <form th:action="@{/admin/update-admin-profile}" method="post" th:if="${admin != null}">
+                    <input type="hidden" name="id" th:value="${admin.id}">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" name="name" th:value="${admin.name}" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" name="email" th:value="${admin.email}" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" name="mobileNumber" th:value="${admin.mobileNumber}" class="form-control">
+                        </div>
+                    </div>
+                    <div class="mt-5 pt-3 border-top">
+                        <button type="submit" class="btn btn-save-settings">Save Profile</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="tab-pane fade" id="security-tab">
+                <div class="section-title">Update Password</div>
+                <form th:action="@{/admin/changePassword}" method="post">
+                    <div class="mb-3 col-md-8">
+                        <label class="form-label">Old Password</label>
+                        <input type="password" name="oldPassword" class="form-control" required>
+                    </div>
+                    <div class="mb-3 col-md-8">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="newPassword" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-dark px-4 py-2 mt-2">Change Password</button>
+                </form>
+            </div>
+
+            <div class="tab-pane fade" id="store-tab">
+                <div class="section-title">Shop & Footer Details</div>
+                <form th:action="@{/admin/update-store-settings}" method="post" enctype="multipart/form-data" th:if="${store != null}">
+                    <input type="hidden" name="id" th:value="${store.id}">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Store Name</label>
+                            <input type="text" name="storeName" th:value="${store.storeName}" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Contact No</label>
+                            <input type="text" name="contactNo" th:value="${store.contactNo}" class="form-control">
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">Store Email</label>
+                            <input type="email" name="storeEmail" th:value="${store.storeEmail}" class="form-control" placeholder="admin@shop.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Footer Copyright Text</label>
+                            <input type="text" name="footerText" th:value="${store.footerText}" class="form-control" placeholder="© 2026 Your Shop">
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="fab fa-facebook text-primary"></i> Facebook URL</label>
+                            <input type="url" name="facebookUrl" th:value="${store.facebookUrl}" class="form-control" placeholder="https://facebook.com/yourpage">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="fab fa-instagram text-danger"></i> Instagram URL</label>
+                            <input type="url" name="instagramUrl" th:value="${store.instagramUrl}" class="form-control" placeholder="https://instagram.com/yourpage">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Shop Address</label>
+                            <textarea name="address" class="form-control" rows="2" placeholder="Full shop address..." th:text="${store.address}"></textarea>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Store Logo</label>
+                            <input type="file" name="logoFile" class="form-control crop-input" data-aspect="1">
+                        </div>
+                    </div>
+                    <div class="mt-4 border-top pt-3">
+                        <button type="submit" class="btn btn-primary px-4">Update Store Settings</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="tab-pane fade" id="banner-tab">
+                <div class="section-title">Home Banners</div>
+                <form th:action="@{/admin/update-banner}" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Upload Banner Image</label>
+                        <input type="file" name="bannerFile" class="form-control crop-input" data-aspect="1.777">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Banner Link (Optional)</label>
+                        <input type="text" name="bannerLink" class="form-control" placeholder="Link enter karein (e.g. /category/offers)">
+                    </div>
+
+                    <button type="submit" class="btn btn-save-settings">Save Banner</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cropModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5>Crop Image</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body text-center"><img id="imageToCrop" src="" style="max-width: 100%;"></div>
+      <div class="modal-footer"><button type="button" id="cropBtn" class="btn btn-primary">Crop & Done</button></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+<script>
+    // Auto-hide Alerts
+    window.onload = function() {
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(a => {
+                let alert = new bootstrap.Alert(a);
+                alert.close();
+            });
+        }, 5000);
+    };
+
+    // Cropper Logic
+    let cropper;
+    let currentInput;
+    const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
+
+    document.querySelectorAll('.crop-input').forEach(input => {
+        input.addEventListener('change', function(e) {
+            currentInput = this;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                document.getElementById('imageToCrop').src = event.target.result;
+                if (cropper) cropper.destroy();
+                cropModal.show();
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        });
+    });
+
+    document.getElementById('cropModal').addEventListener('shown.bs.modal', function() {
+        const aspect = parseFloat(currentInput.getAttribute('data-aspect'));
+        cropper = new Cropper(document.getElementById('imageToCrop'), {
+            aspectRatio: aspect,
+            viewMode: 1
+        });
+    });
+
+    document.getElementById('cropBtn').addEventListener('click', function() {
+        const canvas = cropper.getCroppedCanvas();
+        canvas.toBlob((blob) => {
+            const file = new File([blob], "cropped.png", { type: "image/png" });
+            const container = new DataTransfer();
+            container.items.add(file);
+            currentInput.files = container.files;
+            cropModal.hide();
+        });
+    });
+</script>
+</body>
+</html>

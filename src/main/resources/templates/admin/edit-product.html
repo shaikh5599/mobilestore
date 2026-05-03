@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Admin | Edit Visual Product</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<div th:replace="~{admin/fragments/sidebar :: sidebar-css}"></div>
+
+<style>
+    body { background: #eef2f7; }
+    .preview-box { background: white; border-radius: 15px; padding: 25px; position: sticky; top: 100px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .preview-label { background: #ff9800; color: white; padding: 2px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+    .form-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .service-icon { font-size: 20px; color: #0d6efd; }
+    .discount-tag { color: #388e3c; font-weight: bold; font-size: 14px; }
+    .stock-label { color: #d32f2f; font-weight: bold; font-size: 14px; }
+</style>
+</head>
+<body onload="updatePreview(); updateDynamicLabel();"> 
+<div th:replace="~{admin/fragments/sidebar :: sidebar('manage-products')}"></div>
+
+<div class="main-content" style="padding-top: 80px;">
+    <div class="row px-3">
+        
+        <div class="col-md-7">
+            <div class="form-card">
+                <h4 class="fw-bold mb-4 text-warning">Edit Product Details</h4>
+                <form th:action="@{/admin/products/update}" method="post" enctype="multipart/form-data">
+                    
+                    <input type="hidden" name="id" th:value="${product.id}">
+
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label fw-bold">Product Name</label>
+                            <input type="text" name="name" id="inputName" th:value="${product.name}" class="form-control" oninput="updatePreview()" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Brand</label>
+                            <input type="text" name="brand" id="inputBrand" th:value="${product.brand}" class="form-control" oninput="updatePreview()">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Selling Price (₹)</label>
+                            <input type="number" name="price" id="inputPrice" th:value="${product.price}" class="form-control" oninput="updatePreview()" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">MRP (₹)</label>
+                            <input type="number" name="mrp" id="inputMRP" th:value="${product.mrp}" class="form-control" oninput="updatePreview()">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold text-danger">Stock Quantity</label>
+                            <input type="number" name="stock" id="inputStock" th:value="${product.stock}" class="form-control border-danger" oninput="updatePreview()" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-primary" id="dynamicLabel">Variant/Storage</label>
+                            <input type="text" name="storage" id="inputStorage" th:value="${product.storage}" class="form-control border-primary" oninput="updatePreview()">
+                            <input type="hidden" id="categoryName" th:value="${product.category != null ? product.category.name : ''}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Warranty</label>
+                            <input type="text" name="warranty" id="inputWarranty" th:value="${product.warranty}" class="form-control" oninput="updatePreview()">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Highlights (Comma separated)</label>
+                        <textarea name="highlights" id="inputHighlights" class="form-control" rows="2" oninput="updatePreview()" th:text="${product.highlights}"></textarea>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 d-flex align-items-center">
+                            <div class="form-check me-3">
+                                <input class="form-check-input" type="checkbox" name="freeDelivery" id="checkDelivery" th:checked="${product.freeDelivery}" onchange="updatePreview()">
+                                <label class="form-check-label">Free Delivery</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="returnPolicy" id="checkReturn" th:checked="${product.returnPolicy}" onchange="updatePreview()">
+                                <label class="form-check-label">7 Days Replace</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Change Image (Optional)</label>
+                            <input type="file" name="img" class="form-control" onchange="previewImage(this)">
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-warning w-100 fw-bold text-white py-2 shadow">Update Product</button>
+                        <a href="/admin/products" class="btn btn-light border px-4">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="preview-box">
+                <span class="preview-label mb-3 d-inline-block">EDIT MODE PREVIEW</span>
+                <div class="text-center mb-3">
+                    <img id="viewImg" th:src="@{'/uploads/' + ${product.imageUrl}}" class="img-fluid rounded" style="max-height: 250px;" onerror="this.src='https://via.placeholder.com/200x250?text=No+Image'">
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <small class="text-primary fw-bold" id="viewBrand" th:text="${product.brand}">BRAND</small>
+                    <small class="stock-label">Stock: <span id="viewStock" th:text="${product.stock}">0</span></small>
+                </div>
+                <h3 class="fw-bold text-dark" id="viewName" th:text="${product.name}">Product Name</h3>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <h2 class="text-dark fw-bold m-0">₹<span id="viewPrice" th:text="${product.price}">0</span></h2>
+                    <span class="text-muted text-decoration-line-through">₹<span id="viewMRP" th:text="${product.mrp}">0</span></span>
+                    <span class="discount-tag" id="viewSave">Save ₹0</span>
+                </div>
+
+                <div class="mt-3 p-2 border-top border-bottom d-flex justify-content-around text-center">
+                    <div id="iconDelivery" th:style="${product.freeDelivery ? 'display:block' : 'display:none'}">
+                        <i class="fas fa-truck service-icon"></i><br><small>Free Delivery</small>
+                    </div>
+                    <div id="iconReturn" th:style="${product.returnPolicy ? 'display:block' : 'display:none'}">
+                        <i class="fas fa-undo service-icon"></i><br><small>7 Days Replace</small>
+                    </div>
+                    <div>
+                        <i class="fas fa-shield-alt service-icon"></i><br><small id="viewWarranty" th:text="${product.warranty}">Warranty</small>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <h6 class="fw-bold">Specifications:</h6>
+                    <p class="text-muted small" id="viewHighlights" th:text="${product.highlights}">Specifications...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function updateDynamicLabel() {
+        const catName = document.getElementById('categoryName').value.toLowerCase();
+        const label = document.getElementById('dynamicLabel');
+        const input = document.getElementById('inputStorage');
+
+        if (catName.includes("mobile") || catName.includes("smartphone")) {
+            label.innerText = "RAM & Storage";
+        } else if (catName.includes("audio") || catName.includes("earbud")) {
+            label.innerText = "Color & Type";
+        } else if (catName.includes("charger")) {
+            label.innerText = "Wattage & Port";
+        } else if (catName.includes("watch")) {
+            label.innerText = "Dial Size";
+        }
+    }
+
+    function updatePreview() {
+        document.getElementById('viewName').innerText = document.getElementById('inputName').value || "Product Name";
+        document.getElementById('viewBrand').innerText = document.getElementById('inputBrand').value || "BRAND";
+        document.getElementById('viewWarranty').innerText = document.getElementById('inputWarranty').value || "Warranty";
+        document.getElementById('viewHighlights').innerText = document.getElementById('inputHighlights').value || "Specifications...";
+        document.getElementById('viewStock').innerText = document.getElementById('inputStock').value || "0";
+        
+        const price = parseFloat(document.getElementById('inputPrice').value) || 0;
+        const mrp = parseFloat(document.getElementById('inputMRP').value) || 0;
+        document.getElementById('viewPrice').innerText = price.toLocaleString();
+        document.getElementById('viewMRP').innerText = mrp.toLocaleString();
+        
+        if(mrp > price) {
+            document.getElementById('viewSave').innerText = "Save ₹" + (mrp - price).toLocaleString();
+            document.getElementById('viewSave').style.display = 'inline';
+        } else {
+            document.getElementById('viewSave').style.display = 'none';
+        }
+
+        document.getElementById('iconDelivery').style.display = document.getElementById('checkDelivery').checked ? 'block' : 'none';
+        document.getElementById('iconReturn').style.display = document.getElementById('checkReturn').checked ? 'block' : 'none';
+    }
+
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => document.getElementById('viewImg').src = e.target.result;
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+</body>
+</html>

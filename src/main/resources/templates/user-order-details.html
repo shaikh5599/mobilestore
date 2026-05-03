@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Order Details - Mobile Store</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .card-custom { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); background: #fff; }
+        .status-success { background-color: #d1fae5; color: #059669; }
+        .status-pending { background-color: #e0f2fe; color: #0284c7; }
+        .status-cancelled { background-color: #fee2e2; color: #dc2626; }
+        .badge-custom { padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; display: inline-block; white-space: nowrap; }
+        .bg-light-blue { background-color: #f1f5f9; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: header}"></div>
+
+<div class="container my-4 my-md-5">
+    
+    <a th:href="@{/my-orders}" class="text-decoration-none text-muted mb-4 d-inline-block fw-bold">
+        <i class="fas fa-arrow-left me-2"></i> Back to My Orders
+    </a>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-custom p-4 mb-4">
+                
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 border-bottom pb-3 gap-2">
+                    <div>
+                        <h4 class="fw-bold mb-1 text-dark">Order Summary</h4>
+                        <span class="text-muted small">
+                            Tracking ID: <span class="fw-bold text-dark">#MS-[[${order.id}]]</span> | 
+                            Date: <span th:text="${#temporals.format(order.orderDate, 'dd-MMM-yyyy hh:mm a')}"></span>
+                        </span>
+                    </div>
+                    
+                    <div class="mt-2 mt-md-0">
+                        <span th:if="${#strings.equalsIgnoreCase(order.status, 'Pending')}" class="badge-custom status-pending">
+                            <i class="fas fa-clock me-1"></i> Pending
+                        </span>
+                        
+                        <span th:if="${#strings.equalsIgnoreCase(order.status, 'Shipped')}" class="badge-custom" style="background-color: #fef3c7; color: #d97706;">
+                            <i class="fas fa-truck me-1"></i> Shipped
+                        </span>
+
+                        <span th:if="${#strings.equalsIgnoreCase(order.status, 'Delivered') or #strings.equalsIgnoreCase(order.status, 'Success')}" class="badge-custom status-success">
+                            <i class="fas fa-check-circle me-1"></i> Delivered
+                        </span>
+
+                        <span th:if="${#strings.equalsIgnoreCase(order.status, 'Cancelled')}" class="badge-custom status-cancelled">
+                            <i class="fas fa-times-circle me-1"></i> Cancelled
+                        </span>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold text-muted mb-3"><i class="fas fa-box-open me-2"></i> Item(s) in this Order</h6>
+                
+                <div class="bg-light-blue p-3 mb-4">
+                    <div class="row align-items-center mb-3 border-bottom pb-2" th:each="item : ${order.orderItems}">
+                        <div class="col-3 col-md-2 text-center">
+                            <img th:src="@{'/uploads/' + ${item.product.imageUrl}}" 
+                                 class="img-fluid rounded shadow-sm" style="max-height: 80px;" alt="Product">
+                        </div>
+                        <div class="col-6 col-md-7">
+                            <h6 class="fw-bold mb-1 text-dark" th:text="${item.product.name}">Product Name</h6>
+                            
+                            <span th:if="${item.selectedVariant != null && item.selectedVariant != ''}" 
+                                  class="badge bg-secondary mb-1" th:text="${item.selectedVariant}"></span>
+                            <br th:if="${item.selectedVariant != null && item.selectedVariant != ''}">
+                            
+                            <span class="text-muted small">Qty: <span class="fw-bold text-dark" th:text="${item.quantity}">1</span></span>
+                        </div>
+                        <div class="col-3 col-md-3 text-end">
+                            <h6 class="fw-bold mb-0 text-primary" th:text="'₹' + ${item.price}">₹0</h6>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4 g-4 border-bottom pb-4">
+                    <div class="col-md-6 border-end-md">
+                        <h6 class="fw-bold text-muted mb-3"><i class="fas fa-map-marker-alt text-danger me-2"></i> Delivery Address</h6>
+                        <h6 class="fw-bold mb-1 text-dark" th:text="${order.fullName}">Full Name</h6>
+                        <p class="mb-1 small text-muted"><i class="fas fa-phone-alt me-1"></i> <span th:text="${order.mobileNumber}">Number</span></p>
+                        <p class="small text-muted mb-0" th:text="${order.address + ', ' + order.city + ' - ' + order.pincode}"></p>
+                    </div>
+                    
+                    <div class="col-md-6 ps-md-4">
+                        <h6 class="fw-bold text-muted mb-3"><i class="fas fa-receipt text-warning me-2"></i> Payment Summary</h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-dark fs-6">Grand Total</span>
+                            <span class="fs-4 fw-bold text-success" th:text="'₹' + ${order.totalAmount}">₹0.0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2">
+                    <div th:if="${#strings.equalsIgnoreCase(order.status, 'Pending') or #strings.equalsIgnoreCase(order.status, 'Success')}">
+                        <form th:action="@{/cancel-order/{id}(id=${order.id})}" method="post" 
+                              onsubmit="return confirm('Are you sure you want to cancel this order? This action cannot be undone.');">
+                            <button type="submit" class="btn btn-outline-danger w-100 fw-bold py-2 rounded-3">
+                                <i class="fas fa-ban me-2"></i> Cancel Order
+                            </button>
+                        </form>
+                        <p class="text-muted small text-center mt-2 mb-0"><i class="fas fa-info-circle me-1"></i> You can cancel the order before it is shipped.</p>
+                    </div>
+
+                    <div th:if="${#strings.equalsIgnoreCase(order.status, 'Cancelled')}" class="text-center bg-light p-3 rounded-3">
+                        <p class="text-danger fw-bold mb-0"><i class="fas fa-exclamation-circle me-2"></i> This order was cancelled.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

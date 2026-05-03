@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Store | Best Deals</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-dark: #1a375d;
+            --accent-blue: #0056b3;
+            --bg-light: #f8fafc;
+        }
+
+        body { 
+            background-color: var(--bg-light); 
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            color: #333;
+        }
+
+        /* --- Premium Blue Sub-Menu CSS (Desktop Only) --- */
+        .nav-blue-bar { 
+            background: linear-gradient(90deg, var(--primary-dark), var(--accent-blue)); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            z-index: 990;
+        }
+        .nav-blue-bar ul {
+            display: flex; justify-content: center; align-items: center;
+            list-style: none; margin: 0; padding: 0;
+        }
+        .nav-blue-bar li { margin: 0 10px; }
+        .nav-blue-bar a.nav-link { 
+            color: #f8fafc; text-decoration: none; padding: 16px 20px; 
+            font-weight: 600; font-size: 15px; text-transform: uppercase;
+            letter-spacing: 1px; position: relative;
+        }
+        .nav-blue-bar a.nav-link::after {
+            content: ''; position: absolute; width: 0; height: 3px;
+            bottom: 0; left: 50%; background-color: #00a8ff; 
+            transition: all 0.3s ease; transform: translateX(-50%);
+        }
+        .nav-blue-bar a.nav-link:hover { color: #00a8ff; }
+        .nav-blue-bar a.nav-link:hover::after { width: 100%; }
+        .nav-blue-bar a.deals-link { color: #ff6b6b !important; }
+        .nav-blue-bar a.deals-link::after { background-color: #ff6b6b; }
+
+        /* --- Dynamic Banner Fix --- */
+        .banner-container { width: 100%; background-color: #f1f5f9; overflow: hidden; }
+        .dynamic-banner {
+            width: 100%; height: auto; aspect-ratio: 16 / 9;
+            object-fit: contain; max-height: 500px; display: block; margin: 0 auto;
+        }
+
+        /* --- Infinite Category Scroll CSS --- */
+        .category-scroll-wrapper {
+            overflow: hidden; white-space: nowrap; width: 100%;
+            padding: 15px 0; position: relative;
+        }
+        .category-track {
+            display: inline-block; animation: scrollCategories 20s linear infinite; 
+        }
+        .category-track:hover { animation-play-state: paused; }
+        @keyframes scrollCategories {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); } 
+        }
+        .category-btn {
+            display: inline-block; margin: 0 8px; transition: all 0.3s ease;
+            border: 2px solid #1a375d; color: #1a375d;
+        }
+        .category-btn:hover { background-color: #1a375d; color: white; transform: translateY(-3px); }
+/* --- NATIVE SWIPEABLE CATEGORY SCROLL --- */
+        .category-scroll-wrapper {
+            width: 100%;
+            overflow-x: auto; /* User ko scroll karne dega */
+            -webkit-overflow-scrolling: touch; /* iPhone pe smooth makkhan scroll */
+            padding: 15px 10px;
+            display: flex;
+            scroll-snap-type: x mandatory; /* Ekdum card pe aake rukega */
+        }
+
+        /* Scrollbar ko hide karna taaki app jaisa lage */
+        .category-scroll-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-track {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 12px; /* Buttons ke beech ka gap */
+            padding-right: 20px; /* End me thodi extra space */
+        }
+
+        .category-btn {
+            flex: 0 0 auto; /* Button ko chota hone se rokega */
+            scroll-snap-align: start; /* Scroll hone pe perfect align hoga */
+            border: 2px solid #1a375d;
+            color: #1a375d;
+            background: white;
+            padding: 8px 24px;
+            border-radius: 50px; /* Pill shape */
+            font-weight: 700;
+            text-transform: uppercase;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .category-btn:hover, .category-btn:active {
+            background-color: #1a375d;
+            color: white;
+            transform: scale(0.96);
+        }
+        /* --- Product Grid & Brand Boxes --- */
+        .section-title { font-size: 24px; font-weight: 800; padding: 25px 0 15px; color: #1e293b; }
+        .product-card {
+            background: white; border: 1px solid #e2e8f0; border-radius: 12px;
+            padding: 15px; text-align: center; transition: all 0.3s ease; height: 100%;
+        }
+        .product-name { font-size: 15px; font-weight: 700; color: #334155; margin-bottom: 10px; height: 44px; overflow: hidden; }
+        .price-tag {
+            background: var(--primary-dark); color: white; padding: 6px 20px;
+            border-radius: 8px; font-size: 16px; font-weight: 700;
+        }
+        .brand-box {
+            background: white; border: 1px solid #e2e8f0; padding: 12px 5px;
+            font-size: 14px; font-weight: 700; border-radius: 8px; color: #475569; transition: 0.3s;
+        }
+
+        /* --- Info Section (Shipping etc.) --- */
+        .info-icons { background: white; padding: 25px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
+        .info-item { font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .info-item i { color: #00a8ff; font-size: 26px; }
+
+        /* ========================================= */
+        /* STRICT MOBILE RESPONSIVE CSS              */
+        /* ========================================= */
+        @media (max-width: 768px) {
+            body { padding-bottom: 70px !important; }
+            .dynamic-banner { max-height: 250px; }
+            
+            /* Product Cards Mobile Fix */
+            .mobile-img { height: 110px !important; width: 100%; object-fit: contain; margin-bottom: 10px; }
+            .product-card { padding: 10px; }
+            .product-name { font-size: 13px; height: 38px; }
+            .price-tag { font-size: 14px; padding: 4px 10px; }
+            
+            /* STRICT FIX: Shipping/Info Section Mobile Layout */
+            .info-icons { padding: 15px 0; }
+            .info-item { 
+                flex-direction: column; /* Icon upar, text niche */
+                gap: 5px; 
+                font-size: 11px !important; /* Text chota kiya */
+                text-align: center; 
+            }
+            .info-item i { font-size: 22px !important; margin-bottom: 0; }
+        }
+        html {
+    scroll-behavior: smooth;
+}
+    </style>
+</head>
+<body>
+
+    <div th:replace="~{fragments/navbar :: header}"></div>
+     
+    <div class="nav-blue-bar sticky-top d-none d-md-block">
+        <div class="container">
+            <ul>
+                <li><a class="nav-link" th:href="@{/}">Home</a></li>
+                <li><a class="nav-link" th:href="@{'/category/name/Smartphone'}">Mobiles</a></li>
+                <li><a class="nav-link" th:href="@{'/category/name/Accessories'}">Accessories</a></li>
+                <li><a class="nav-link deals-link" th:href="@{/deals}">Deals</a></li>
+                <li><a href="#contact-footer" class="nav-link text-white">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+
+   <div class="container-fluid p-0 mb-3">
+    
+    <div th:if="${store != null && store.bannerImage != null}" class="banner-container">
+        <a th:href="${store.bannerLink != null ? store.bannerLink : '#'}" 
+           th:style="${store.bannerLink == null ? 'cursor: default;' : ''}">
+<img th:src="${store.bannerImage}" class="img-fluid w-100" style="aspect-ratio: 16/9; object-fit: cover;" alt="Store Banner">        </a>
+    </div>
+
+    <div th:unless="${store != null && store.bannerImage != null}">
+        <img th:src="@{/img/default-banner.jpg}" class="img-fluid w-100" style="aspect-ratio: 16/9; object-fit: cover;" alt="Default Banner">
+    </div>
+
+</div>
+   <div class="category-scroll-wrapper mb-4">
+        <div class="category-track">
+            
+            <a th:href="@{/}" class="category-btn">
+                All
+            </a>
+
+            <a th:each="cat : ${categories}" 
+               th:href="@{'/category/' + ${cat.id}}" 
+               class="category-btn">
+                <span th:text="${cat.name}">Category Name</span>
+            </a>
+
+        </div>
+    </div>
+    <div class="container mb-5">
+        <h2 class="section-title">Featured Smartphones</h2>
+        <div class="row g-2 g-md-4"> 
+            
+            <div class="col-6 col-md-4 col-lg-3" th:each="p : ${products}">
+                <div class="product-card"> 
+                    <a th:href="@{'/product/detail/' + ${p.id}}"> 
+<img th:src="${p.imageUrl}" class="mobile-img" onerror="this.src='https://via.placeholder.com/250?text=No+Image'">                    </a>
+                    <h5 class="product-name">
+                        <a th:href="@{'/product/detail/' + ${p.id}}" th:text="${p.name}" class="text-decoration-none text-dark">Name</a>
+                    </h5>
+                    <div class="d-flex flex-column gap-2 mt-2">
+                        <span class="price-tag text-center" th:text="'₹' + ${p.price}"></span>
+                        <form th:action="@{'/cart/add/' + ${p.id}}" method="post" class="w-100 m-0">
+                            <input type="hidden" name="quantity" value="1" />
+                            <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold rounded-pill">
+                                <i class="fas fa-shopping-cart"></i> Add
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <h2 class="section-title mt-5">Top Brands</h2>
+        <div class="row g-2 text-center">
+            <div class="col-4 col-md-2"><a th:href="@{/brand/Samsung}" class="text-decoration-none"><div class="brand-box">SAMSUNG</div></a></div>
+            <div class="col-4 col-md-2"><a th:href="@{/brand/Apple}" class="text-decoration-none"><div class="brand-box">APPLE</div></a></div>
+            <div class="col-4 col-md-2"><a th:href="@{/brand/OnePlus}" class="text-decoration-none"><div class="brand-box">ONEPLUS</div></a></div>
+            <div class="col-4 col-md-2"><a th:href="@{/brand/Xiaomi}" class="text-decoration-none"><div class="brand-box">XIAOMI</div></a></div>
+            <div class="col-4 col-md-2"><a th:href="@{/brand/Oppo}" class="text-decoration-none"><div class="brand-box">OPPO</div></a></div>
+            <div class="col-4 col-md-2"><a th:href="@{/brand/Vivo}" class="text-decoration-none"><div class="brand-box">VIVO</div></a></div>
+        </div>
+    </div>
+
+    <div class="info-icons mb-4">
+        <div class="container">
+            <div class="row g-2">
+                <div class="col-4"><div class="info-item"><i class="fas fa-truck"></i> <span>Free Shipping</span></div></div>
+                <div class="col-4"><div class="info-item"><i class="fas fa-award"></i> <span>Best Prices</span></div></div>
+                <div class="col-4"><div class="info-item"><i class="fas fa-headset"></i> <span>24/7 Support</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

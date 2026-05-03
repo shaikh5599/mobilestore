@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Footer Fragment</title>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <div th:fragment="footer" class="w-100 mt-auto">
+        
+        <style>
+            /* Footer Sleek Styling */
+            .premium-footer {
+                background-color: #123456; 
+                padding: 30px 0 15px 0; 
+                color: #eef2f7;
+                width: 100%;
+            }
+            
+            .footer-col h5 {
+                font-size: 16px; 
+                letter-spacing: 0.5px;
+            }
+
+            /* Premium Circular Social Icons (THEME COLOR APPLIED) */
+            .social-icons a {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 35px;
+                height: 35px;
+                border-radius: 50%;
+                background-color: #ffffff !important; /* Circle ko white kiya */
+                text-decoration: none;
+                margin-right: 10px;
+                transition: 0.3s;
+                font-size: 16px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            }
+            
+            /* Icon ka color aapke Theme ka Dark Blue hai */
+            .social-icons a i {
+                color: #123456 !important; 
+            }
+
+            /* Hover Effect */
+            .social-icons a:hover {
+                background-color: #0dcaf0 !important; /* Hover pe Cyan/Info color */
+                transform: translateY(-3px);
+            }
+            
+            .social-icons a:hover i {
+                color: #ffffff !important; /* Hover pe icon white */
+            }
+
+            /* MOBILE BOTTOM NAV - SOLID & VISIBLE */
+            .smart-app-nav {
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 65px !important;
+                background-color: #ffffff !important; 
+                box-shadow: 0 -5px 25px rgba(0,0,0,0.2) !important;
+                z-index: 99999 !important;
+                display: flex !important;
+                justify-content: space-around !important;
+                align-items: center !important;
+                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            }
+
+            /* Bulletproof Icons & Text Color for Bottom Nav */
+            .nav-link-item {
+                text-align: center !important;
+                text-decoration: none !important;
+                width: 25% !important;
+                font-family: sans-serif !important;
+            }
+
+            .nav-link-item, .nav-link-item i, .nav-link-item span {
+                color: #64748b !important; /* Force Slate Gray */
+            }
+
+            .nav-link-item i { 
+                font-size: 22px; 
+                margin-bottom: 3px; 
+                display: block; 
+            }
+            
+            .nav-link-item span { 
+                font-size: 10px; 
+                font-weight: 700; 
+                text-transform: uppercase; 
+            }
+
+            /* Active Cart Color */
+            .cart-active, .cart-active i, .cart-active span { 
+                color: #ff9f00 !important; /* Force Orange */
+            }
+
+            /* Hide on scroll class */
+            .nav-off-screen {
+                transform: translateY(100%) !important;
+            }
+
+            /* Mobile Overlap Fix */
+            @media (max-width: 768px) {
+                .premium-footer {
+                    padding-bottom: 90px !important; /* Mobile nav bar ke liye jagah */
+                    text-align: center !important;
+                }
+                .footer-col { margin-bottom: 30px; }
+            }
+        </style>
+
+        <footer class="premium-footer" id="contact-footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 footer-col mb-3 mb-md-0">
+                        <h5 class="fw-bold text-info mb-2" th:text="${store != null ? store.storeName : 'Mobile Store'}">Mobile Store</h5>
+                        <p class="text-light small mb-3 opacity-75" th:text="${store != null ? store.address : 'Shop Address'}">Address</p>
+                       <div class="social-icons">
+    <a th:href="${store?.facebookUrl}" target="_blank" rel="noopener noreferrer" title="Facebook">
+        <i class="fab fa-facebook-f"></i>
+    </a>                
+    <a th:href="${store?.instagramUrl}" target="_blank" rel="noopener noreferrer" title="Instagram">
+        <i class="fab fa-instagram"></i>
+    </a>
+</div>
+                    </div>
+
+                    <div class="col-md-4 footer-col text-md-center mb-3 mb-md-0">
+                        <h5 class="fw-bold text-info mb-2">Contact Us</h5>
+                        <p class="small mb-1 opacity-75">
+                            <i class="fas fa-envelope me-2 text-info"></i> 
+                            <span th:text="${store?.storeEmail}">admin@shop.com</span>
+                        </p>
+                        <p class="small opacity-75">
+                            <i class="fas fa-phone me-2 text-info"></i> 
+                            <span th:text="${store?.contactNo}">+91 9876543210</span>
+                        </p>
+                    </div>
+
+                    <div class="col-md-4 footer-col text-md-end">
+                        <h5 class="fw-bold text-info mb-2">Support</h5>
+                        <p class="small opacity-75 mb-0">Available 10 AM - 9 PM</p>
+                        <p class="small opacity-75">7 Days a Week</p>
+                    </div>
+                </div>
+                
+                <hr class="border-light opacity-25 my-3"> 
+                <p class="text-center text-light small mb-0 opacity-50" th:text="${store?.footerText}">© 2026 Your Shop.</p>
+            </div>
+        </footer>
+
+        <div class="smart-app-nav d-md-none" id="mainMobileNav">
+            <a th:href="@{/}" class="nav-link-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a th:href="@{'/category/name/Smartphone'}" class="nav-link-item">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Mobiles</span>
+            </a>
+            <a th:href="@{/cart}" class="nav-link-item cart-active position-relative">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger" 
+                      style="font-size: 9px; border: 2px solid white; margin-left: 10px;"
+                      th:if="${globalCartCount != null && globalCartCount > 0}" th:text="${globalCartCount}">0</span>
+                <span>Cart</span>
+            </a>
+            <a th:href="@{/profile}" class="nav-link-item">
+                <i class="fas fa-user"></i>
+                <span>Account</span>
+            </a>
+        </div>
+
+        <script>
+            (function() {
+                let lastScroll = 0;
+                const nav = document.getElementById('mainMobileNav');
+                if(nav) {
+                    window.addEventListener('scroll', () => {
+                        const currentScroll = window.pageYOffset;
+                        if (currentScroll > lastScroll && currentScroll > 100) {
+                            nav.classList.add('nav-off-screen'); // Scrolling Down
+                        } else {
+                            nav.classList.remove('nav-off-screen'); // Scrolling Up
+                        }
+                        lastScroll = currentScroll;
+                    });
+                }
+            })();
+        </script>
+        
+    </div>
+</body>
+</html>

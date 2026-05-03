@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Header Fragment</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+
+<div th:fragment="header" class="sticky-top" style="z-index: 1040;">
+
+    <nav class="navbar navbar-expand-md navbar-dark shadow-sm py-2" style="background-color: #1a375d;">
+      
+        <div class="container d-flex justify-content-between align-items-center">
+            
+            <div class="d-flex align-items-center">
+                
+                <a href="#" id="smartBackBtn" class="text-white text-decoration-none me-3" style="display: none; margin-top: 2px;">
+                    <i class="fas fa-arrow-left fs-4"></i>
+                </a>            
+                
+                <a class="navbar-brand fw-bold fs-4 d-flex align-items-center m-0" href="/">
+                    <th:block th:if="${store != null && store.logo != null && store.logo != ''}">
+                       <img th:if="${store != null and store.logo != null and !#strings.isEmpty(store.logo)}" 
+     th:src="${store.logo}" 
+     alt="Store Logo" 
+     style="height: 40px; object-fit: contain;">
+                    </th:block>
+                    <th:block th:unless="${store != null && store.logo != null && store.logo != ''}">
+                        <i class="fas fa-mobile-alt me-2 text-info"></i>
+                    </th:block>
+                    <span th:text="${store != null ? store.storeName : 'Mobile Store'}">Mobile Store</span>
+                </a>
+            </div>
+
+            <div class="d-none d-md-flex align-items-center gap-4">
+                <form th:action="@{/search}" method="get" class="d-flex bg-white rounded-pill overflow-hidden" style="width: 350px;">
+                    <input class="form-control border-0 shadow-none px-3" type="search" name="keyword" th:value="${keyword}" placeholder="Search smartphones, brands..." style="font-size: 14px;">
+                    <button class="btn btn-light border-0 text-primary px-3" type="submit"><i class="fas fa-search"></i></button>
+                </form>
+
+                <a href="/cart" class="nav-link position-relative text-white">
+                    <i class="fas fa-shopping-cart fs-5"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" th:if="${globalCartCount != null and globalCartCount > 0}" th:text="${globalCartCount}">0</span>
+                </a>
+
+                <a th:if="${loggedInUser != null}" href="/my-orders" class="nav-link text-white fw-bold" style="font-size: 14px;">
+                    <i class="fas fa-box me-1 text-info"></i> Orders
+                </a>
+                
+                <div class="dropdown" th:if="${loggedInUser != null}">
+                    <a class="text-decoration-none text-white dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                        <img src="https://ui-avatars.com/api/?name=User&background=0dcaf0&color=fff" class="rounded-circle border border-2 border-info me-2" width="32">
+                        <span th:text="${loggedInUser.name}" style="font-size: 14px;">User</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 12px; margin-top: 10px;">
+                        <li><a class="dropdown-item fw-bold text-dark" href="/profile"><i class="fas fa-user-circle me-2 text-muted"></i>My Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger fw-bold" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+
+                <div th:unless="${loggedInUser != null}">
+                    <a href="/login" class="btn btn-outline-light btn-sm rounded-pill px-3 me-2 fw-bold">Login</a>
+                    <a href="/register" class="btn btn-info btn-sm rounded-pill px-3 fw-bold text-white">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="d-md-none bg-white border-bottom shadow-sm p-2">
+        <div class="container">
+            <form th:action="@{/search}" method="get" class="d-flex bg-light rounded-pill overflow-hidden border">
+                <input class="form-control border-0 shadow-none px-3 bg-transparent" type="search" name="keyword" th:value="${keyword}" placeholder="Search mobiles, accessories..." style="font-size: 14px;">
+                <button class="btn border-0 text-primary px-3" type="submit"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentPath = window.location.pathname;
+            let backBtn = document.getElementById("smartBackBtn");
+            
+            if (backBtn) {
+                // 1. Agar Home page par hain, toh button gayab kar do
+                if (currentPath === "/" || currentPath === "/index" || currentPath === "/home" || currentPath === "") {
+                    backBtn.style.display = "none"; 
+                } else {
+                    // Baaki sab pages par button dikhao
+                    backBtn.style.display = "block";
+                    
+                    // 2. SMART LOGIC: Kaunse page se kahan jana hai
+                    if (currentPath.includes("/order-success")) {
+                        // Order hone ke baad wapas form pe nahi, sidha Home bhejo
+                        backBtn.href = "/";
+                    } else if (currentPath.includes("/checkout")) {
+                        // Checkout se back aane par Cart mein bhejo
+                        backBtn.href = "/cart";
+                    } else if (currentPath.includes("/order-details")) {
+                        // Order details se back aane par My Orders list mein bhejo
+                        backBtn.href = "/my-orders";
+                    } else if (currentPath.includes("/login") || currentPath.includes("/register")) {
+                        // Login/Register page se back dabane par sidha Home
+                        backBtn.href = "/";
+                    } else {
+                        // Baaki saari jagah (jaise Product details) default 1 step peeche bhejo
+                        backBtn.href = "javascript:history.back()";
+                    }
+                }
+            }
+        });
+    </script>
+
+</div>
+
+</body>
+</html>

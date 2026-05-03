@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Shopping Cart</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body { 
+            background-color: #f8fafc; 
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        /* --- Premium Card Styling --- */
+        .cart-item-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .product-img { 
+            width: 80px; 
+            height: 80px; 
+            object-fit: contain; 
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 5px;
+        }
+
+        .delete-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background-color: #fee2e2;
+            color: #ef4444;
+            border: none;
+            transition: 0.2s;
+        }
+        .delete-btn:hover { background-color: #fca5a5; color: white; }
+
+        .total-section { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            border: 1px solid #e2e8f0;
+        }
+
+        /* --- STRICT MOBILE RESPONSIVE CSS --- */
+        @media (max-width: 768px) {
+            body { padding-bottom: 140px !important; } /* Sticky bottom space */
+            
+            .cart-item-card { padding: 10px; }
+            .product-img { width: 70px; height: 70px; }
+            
+            /* Magic: Mobile Sticky Checkout Bar */
+            .mobile-checkout-bar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                background: white;
+                padding: 15px 20px;
+                box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+                z-index: 1000;
+                border-top: 1px solid #e2e8f0;
+            }
+            
+            /* Desktop total section ko mobile me hide karenge */
+            .desktop-total { display: none !important; }
+        }
+
+        /* Mobile total section ko desktop me hide karenge */
+        @media (min-width: 769px) {
+            .mobile-checkout-bar { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: header}"></div>
+
+<div class="container my-4 my-md-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-dark mb-0"><i class="fas fa-shopping-cart text-primary me-2"></i> My Cart</h3>
+        <span class="badge bg-primary rounded-pill fs-6 px-3" th:if="${not #lists.isEmpty(cartItems)}" th:text="${#lists.size(cartItems)} + ' Items'">0 Items</span>
+    </div>
+
+    <div class="row">
+        
+        <div class="col-lg-8">
+            
+            <div th:each="item : ${cartItems}" class="cart-item-card">
+                
+<img th:src="${item.product.imageUrl}" class="product-img me-3">                
+                <div class="flex-grow-1">
+                    <h6 class="fw-bold mb-1 text-dark text-truncate" style="max-width: 200px;" th:text="${item.product.name}">Product Name</h6>
+                    <div class="text-muted" style="font-size: 14px;">
+                        Price: <span th:text="'₹' + ${item.product.price}">₹0</span> 
+                        <span class="mx-1">|</span> 
+                        Qty: <span class="fw-bold text-dark" th:text="${item.quantity}">1</span>
+                    </div>
+                    <div class="fw-bold text-success mt-1 fs-5" th:text="'₹' + ${item.totalPrice}">₹0</div>
+                </div>
+                
+                <div class="ms-2">
+                    <a th:href="@{'/cart/delete/' + ${item.id}}" class="delete-btn text-decoration-none" 
+                       onclick="return confirm('Bhai, pakka remove karna hai?');">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </div>
+
+            </div>
+
+            <div th:if="${#lists.isEmpty(cartItems)}" class="text-center py-5 bg-white rounded-4 shadow-sm border mt-3">
+                <i class="fas fa-cart-arrow-down mb-3" style="font-size: 60px; color: #cbd5e1;"></i>
+                <h4 class="fw-bold text-muted">Aapka cart khali hai</h4>
+                <p class="text-muted mb-4">Lagta hai aapne abhi tak kuch pasand nahi kiya.</p>
+                <a href="/" class="btn btn-primary px-4 py-2 rounded-pill fw-bold">Start Shopping</a>
+            </div>
+
+            <div class="mt-4 d-none d-md-block" th:if="${not #lists.isEmpty(cartItems)}">
+                <a href="/" class="text-decoration-none text-primary fw-bold">
+                    <i class="fas fa-arrow-left me-1"></i> Continue Shopping
+                </a>
+            </div>
+            
+        </div>
+
+        <div class="col-lg-4 mt-4 mt-lg-0 desktop-total" th:if="${not #lists.isEmpty(cartItems)}">
+            <div class="total-section position-sticky" style="top: 100px;">
+                <h5 class="fw-bold mb-4 border-bottom pb-2">Order Summary</h5>
+                
+                <div class="d-flex justify-content-between mb-3 text-muted">
+                    <span>Subtotal</span>
+                    <span class="text-dark fw-bold" th:text="'₹' + ${grandTotal}">₹0</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3 text-muted">
+                    <span>Shipping Free</span>
+                    <span class="text-success fw-bold">₹0</span>
+                </div>
+                
+                <div class="border-top pt-3 mt-2 d-flex justify-content-between align-items-center">
+                    <span class="fs-5 fw-bold text-dark">Grand Total</span>
+                    <span class="fs-4 fw-bold text-primary" th:text="'₹' + ${grandTotal}">₹0</span>
+                </div>
+                
+                <a href="/checkout" class="btn btn-warning w-100 mt-4 py-3 fw-bold rounded-3 fs-5 shadow-sm">
+                    Proceed to Checkout
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div th:if="${not #lists.isEmpty(cartItems)}" class="mobile-checkout-bar">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="text-muted fw-bold" style="font-size: 14px;">Total Amount</span>
+        <span class="fs-4 fw-bold text-dark" th:text="'₹' + ${grandTotal}">₹0</span>
+    </div>
+    <div class="row g-2">
+        <div class="col-6">
+            <a href="/" class="btn btn-outline-dark w-100 fw-bold py-2" style="border-radius: 8px;">
+                Home
+            </a>
+        </div>
+        <div class="col-6">
+            <a href="/checkout" class="btn btn-warning w-100 fw-bold py-2 shadow-sm" style="border-radius: 8px;">
+                Checkout <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
