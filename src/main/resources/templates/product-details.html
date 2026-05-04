@@ -60,7 +60,8 @@
                 
                 <div class="col-md-5 mb-4 mb-md-0">
                     <div class="product-image-container position-relative">
-<img th:src="${product.imageUrl}" class="main-image" onerror="this.src='https://via.placeholder.com/400?text=No+Image'">                    </div>
+                        <img th:src="${product.imageUrl}" class="main-image" onerror="this.src='https://via.placeholder.com/400?text=No+Image'">
+                    </div>
                 </div>
 
                 <div class="col-md-7 ps-md-5">
@@ -87,6 +88,40 @@
                              th:text="${variant.trim()}">
                         </div>
                     </div>
+
+                    <!-- NAYA ADD KIYA HUA HISSA YAHAN SE SHURU HOTA HAI -->
+                    
+                    <!-- Highlights -->
+                    <div class="mb-4" th:if="${product.highlights != null && product.highlights != ''}">
+                        <p class="fw-bold mb-2 text-dark">Highlights:</p>
+                        <ul style="padding-left: 20px; color: #555; font-size: 15px;">
+                            <li th:each="point : ${#strings.arraySplit(product.highlights, ',')}" th:text="${point.trim()}"></li>
+                        </ul>
+                    </div>
+
+                    <!-- Trust Icons (Warranty, Free Delivery, Return Policy) -->
+                    <div class="row g-2 mb-4">
+                        <div class="col-4" th:if="${product.warranty != null && product.warranty != ''}">
+                            <div class="trust-icon h-100 p-2" style="background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <i class="fas fa-shield-alt"></i>
+                                <span class="fw-bold" th:text="${product.warranty}"></span>
+                            </div>
+                        </div>
+                        <div class="col-4" th:if="${product.freeDelivery != null && product.freeDelivery}">
+                            <div class="trust-icon h-100 p-2" style="background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <i class="fas fa-truck"></i>
+                                <span class="fw-bold">Free Delivery</span>
+                            </div>
+                        </div>
+                        <div class="col-4" th:if="${product.returnPolicy != null && product.returnPolicy}">
+                            <div class="trust-icon h-100 p-2" style="background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <i class="fas fa-undo"></i>
+                                <span class="fw-bold">Return Policy</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- NAYA HISSA YAHAN KHATAM -->
 
                     <form th:action="@{'/cart/add/' + ${product.id}}" method="post" class="mt-4">
                         
@@ -119,6 +154,12 @@
                             </div>
                         </div>
                     </form>
+                    
+                    <!-- NAYA ADD KIYA HUA DESCRIPTION BOX -->
+                    <div class="mt-4 pt-4 border-top" th:if="${product.description != null && product.description != ''}">
+                        <h5 class="fw-bold text-dark mb-3">Product Description</h5>
+                        <p class="text-muted" style="white-space: pre-wrap; font-size: 15px;" th:text="${product.description}"></p>
+                    </div>
                     
                 </div> 
             </div> 
